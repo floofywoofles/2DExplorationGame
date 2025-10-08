@@ -1,5 +1,6 @@
 export type Tile = {
     tile: string;
     flags: object;
-    items: string[];
+    items?: string[];
+    instanceId: string;
 }

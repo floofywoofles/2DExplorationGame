@@ -14,3 +14,4 @@ const gameState: GameState = {
 };
 
 const loader: RoomLoader = new RoomLoader(gameState.currRoom);
+loader.load();
