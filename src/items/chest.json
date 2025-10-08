@@ -1,12 +1,12 @@
 {
-    "name": "chest",
-    "sprite": "$",
-    "id": "",
-    "flags": {
-        "locked": true,
-        "has_item": true
-    },
-    "items": [
-        
-    ]
+  "name": "chest",
+  "sprite": "$",
+  "id": "item_1759952282552_53wh",
+  "flags": {
+    "locked": true,
+    "is_solid": true
+  },
+  "items": [
+    "boogers"
+  ]
 }

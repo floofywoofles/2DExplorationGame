@@ -244,21 +244,20 @@
         "items": []
       },
       {
-        "tile": "ground",
-        "instanceId": "instance_34",
-        "flags": {},
-        "items": []
-      },
-      {
         "tile": "chest",
-        "instanceId": "instance_136",
+        "instanceId": "instance_150",
         "flags": {
-          "locked": true,
-          "has_item": true
+          "locked": true
         },
         "items": [
           "boogers"
         ]
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_139",
+        "flags": {},
+        "items": []
       },
       {
         "tile": "ground",
@@ -297,9 +296,11 @@
         "items": []
       },
       {
-        "tile": "ground",
-        "instanceId": "instance_41",
-        "flags": {},
+        "tile": "door",
+        "instanceId": "instance_137",
+        "flags": {
+          "to": ""
+        },
         "items": []
       },
       {
@@ -316,7 +317,7 @@
       },
       {
         "tile": "ground",
-        "instanceId": "instance_44",
+        "instanceId": "instance_146",
         "flags": {},
         "items": []
       },
@@ -339,9 +340,11 @@
         "items": []
       },
       {
-        "tile": "ground",
-        "instanceId": "instance_48",
-        "flags": {},
+        "tile": "door",
+        "instanceId": "instance_138",
+        "flags": {
+          "to": "instance_239"
+        },
         "items": []
       },
       {

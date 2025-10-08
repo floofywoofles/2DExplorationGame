@@ -8,5 +8,8 @@
   },
   "peerDependencies": {
     "typescript": "^5"
+  },
+  "scripts": {
+    "editor": "bun run src/editor/editor.ts"
   }
 }
