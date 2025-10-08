@@ -1,0 +1,703 @@
+{
+  "width": 10,
+  "height": 10,
+  "grid": [
+    [
+      {
+        "tile": "wall",
+        "instanceId": "instance_100",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      },
+      {
+        "tile": "wall",
+        "instanceId": "instance_135",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      },
+      {
+        "tile": "wall",
+        "instanceId": "instance_134",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      },
+      {
+        "tile": "wall",
+        "instanceId": "instance_133",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      },
+      {
+        "tile": "wall",
+        "instanceId": "instance_132",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      },
+      {
+        "tile": "wall",
+        "instanceId": "instance_131",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      },
+      {
+        "tile": "wall",
+        "instanceId": "instance_130",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      },
+      {
+        "tile": "wall",
+        "instanceId": "instance_129",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      },
+      {
+        "tile": "wall",
+        "instanceId": "instance_128",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      },
+      {
+        "tile": "wall",
+        "instanceId": "instance_127",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      }
+    ],
+    [
+      {
+        "tile": "wall",
+        "instanceId": "instance_101",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_11",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_12",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_13",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_14",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_15",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_16",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_17",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_18",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "wall",
+        "instanceId": "instance_126",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      }
+    ],
+    [
+      {
+        "tile": "wall",
+        "instanceId": "instance_102",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_21",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_22",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_23",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_24",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_25",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_26",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_27",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_28",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "wall",
+        "instanceId": "instance_125",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      }
+    ],
+    [
+      {
+        "tile": "wall",
+        "instanceId": "instance_103",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_31",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_32",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_33",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_34",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "chest",
+        "instanceId": "instance_136",
+        "flags": {
+          "locked": true,
+          "has_item": true
+        },
+        "items": [
+          "boogers"
+        ]
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_36",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_37",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_38",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "wall",
+        "instanceId": "instance_124",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      }
+    ],
+    [
+      {
+        "tile": "wall",
+        "instanceId": "instance_104",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_41",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_42",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_43",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_44",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_45",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_46",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_47",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_48",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "wall",
+        "instanceId": "instance_123",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      }
+    ],
+    [
+      {
+        "tile": "wall",
+        "instanceId": "instance_105",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_51",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_52",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_53",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_54",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_55",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_56",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_57",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_58",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "wall",
+        "instanceId": "instance_122",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      }
+    ],
+    [
+      {
+        "tile": "wall",
+        "instanceId": "instance_106",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_61",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_62",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_63",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_64",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_65",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_66",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_67",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_68",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "wall",
+        "instanceId": "instance_121",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      }
+    ],
+    [
+      {
+        "tile": "wall",
+        "instanceId": "instance_107",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_71",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_72",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_73",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_74",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_75",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_76",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_77",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_78",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "wall",
+        "instanceId": "instance_120",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      }
+    ],
+    [
+      {
+        "tile": "wall",
+        "instanceId": "instance_108",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_81",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_82",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_83",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_84",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_85",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_86",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_87",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "ground",
+        "instanceId": "instance_88",
+        "flags": {},
+        "items": []
+      },
+      {
+        "tile": "wall",
+        "instanceId": "instance_119",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      }
+    ],
+    [
+      {
+        "tile": "wall",
+        "instanceId": "instance_109",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      },
+      {
+        "tile": "wall",
+        "instanceId": "instance_110",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      },
+      {
+        "tile": "wall",
+        "instanceId": "instance_111",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      },
+      {
+        "tile": "wall",
+        "instanceId": "instance_112",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      },
+      {
+        "tile": "wall",
+        "instanceId": "instance_113",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      },
+      {
+        "tile": "wall",
+        "instanceId": "instance_114",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      },
+      {
+        "tile": "wall",
+        "instanceId": "instance_115",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      },
+      {
+        "tile": "wall",
+        "instanceId": "instance_116",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      },
+      {
+        "tile": "wall",
+        "instanceId": "instance_117",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      },
+      {
+        "tile": "wall",
+        "instanceId": "instance_118",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      }
+    ]
+  ]
+}

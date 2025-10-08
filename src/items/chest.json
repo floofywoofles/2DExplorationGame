@@ -1,0 +1,12 @@
+{
+    "name": "chest",
+    "sprite": "$",
+    "id": "",
+    "flags": {
+        "locked": true,
+        "has_item": true
+    },
+    "items": [
+        
+    ]
+}

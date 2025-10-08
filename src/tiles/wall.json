@@ -1,0 +1,8 @@
+{
+    "name": "wall",
+    "sprite": "#",
+    "id": "",
+    "flags": {
+        "is_solid": true
+    }
+}
