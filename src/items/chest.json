@@ -1,12 +1,9 @@
 {
   "name": "chest",
-  "sprite": "$",
-  "id": "item_1759952282552_53wh",
+  "sprite": "C",
+  "id": "item_1760042911683_8xlr",
   "flags": {
-    "locked": true,
     "is_solid": true
   },
-  "items": [
-    "boogers"
-  ]
+  "items": []
 }

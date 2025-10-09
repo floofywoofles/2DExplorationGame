@@ -300,7 +300,7 @@ function renderInfoBox(state: EditorState): void {
   
   output += '  ├' + '─'.repeat(50) + '┤\n';
   output += '  │ WASD=move  E/Q=cycle  1-9=items  R=room  I/L   │\n';
-  output += '  │ Space=place/edit  Ctrl+S=save  Ctrl+C=exit    │\n';
+  output += '  │ Space=place/edit  D=delete  Ctrl+S=save  Ctrl+C=exit │\n';
   output += '  └' + '─'.repeat(50) + '┘\n';
   
   process.stdout.write(output);
@@ -784,12 +784,12 @@ async function handleNormalModeKey(state: EditorState, key: string): Promise<voi
       selectItem(state, parseInt(key) - 1);
       break;
     case ' ':
-      // Check if current cell has editable content
+      // Check if current cell has a non-ground tile that can be edited
       const cell = state.grid[state.cursorY]?.[state.cursorX];
-      // Allow editing if instanceFlags or instanceItems exist (even if empty)
-      const hasEditableContent = cell && (cell.instanceFlags !== undefined || cell.instanceItems !== undefined);
+      // Only open edit menu if the cell contains a non-ground tile
+      const isNonGroundTile = cell && cell.tile.name !== 'ground';
       
-      if (hasEditableContent) {
+      if (isNonGroundTile) {
         openEditMenu(state);
       } else {
         placeSelected(state);
@@ -809,6 +809,20 @@ async function handleNormalModeKey(state: EditorState, key: string): Promise<voi
       break;
     case 'l':
       openItemEditorList(state);
+      break;
+    case 'D':
+      // Delete entity at current cursor position (replace with ground tile)
+      const cellToDelete = state.grid[state.cursorY]?.[state.cursorX];
+      if (cellToDelete && cellToDelete.tile.name !== 'ground') {
+        const groundTile = state.tiles[0];
+        const row = state.grid[state.cursorY];
+        if (groundTile && row) {
+          row[state.cursorX] = {
+            tile: groundTile,
+            instanceId: generateInstanceId(state),
+          };
+        }
+      }
       break;
   }
 }

@@ -16,7 +16,19 @@ export class RoomLoader {
     }
 
     private async loadTileConfig(tileName: string): Promise<{ sprite: string; flags: object }> {
-        const tileFile = await Bun.file(path.resolve(__dirname, "tiles", `${tileName}.json`)).json();
+        // Try to load from tiles directory first, then items directory
+        let tileFile;
+        try {
+            tileFile = await Bun.file(path.resolve(__dirname, "tiles", `${tileName}.json`)).json();
+        } catch (error) {
+            // If not found in tiles, try items directory
+            try {
+                tileFile = await Bun.file(path.resolve(__dirname, "items", `${tileName}.json`)).json();
+            } catch (itemError) {
+                console.error(`[LOADER] Could not find tile/item: ${tileName}`);
+                throw new Error(`Tile/item '${tileName}' not found in tiles/ or items/ directories`);
+            }
+        }
         return {
             sprite: tileFile.sprite || "?",
             flags: tileFile.flags || {}
