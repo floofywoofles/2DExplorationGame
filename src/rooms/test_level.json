@@ -250,7 +250,8 @@
           "locked": true
         },
         "items": [
-          "boogers"
+          "boogers",
+          "coin"
         ]
       },
       {
@@ -583,7 +584,7 @@
       },
       {
         "tile": "ground",
-        "instanceId": "instance_84",
+        "instanceId": "instance_168",
         "flags": {},
         "items": []
       },

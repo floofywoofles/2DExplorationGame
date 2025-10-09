@@ -786,10 +786,10 @@ async function handleNormalModeKey(state: EditorState, key: string): Promise<voi
     case ' ':
       // Check if current cell has editable content
       const cell = state.grid[state.cursorY]?.[state.cursorX];
-      const hasEditableFlags = cell?.instanceFlags && Object.keys(cell.instanceFlags).length > 0;
-      const hasEditableItems = cell?.instanceItems && cell.instanceItems.length > 0;
+      // Allow editing if instanceFlags or instanceItems exist (even if empty)
+      const hasEditableContent = cell && (cell.instanceFlags !== undefined || cell.instanceItems !== undefined);
       
-      if (cell && (hasEditableFlags || hasEditableItems)) {
+      if (hasEditableContent) {
         openEditMenu(state);
       } else {
         placeSelected(state);

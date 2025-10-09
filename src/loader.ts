@@ -3,6 +3,7 @@ import { Room } from "./room";
 import type { Tile } from "./types/tileData";
 import type { RoomData } from "./types/roomData";
 import { Entity } from "./entity";
+import { Entities } from "./entities";
 
 export class RoomLoader {
     private room: string;
@@ -14,35 +15,44 @@ export class RoomLoader {
         return this.room;
     }
 
+    private async loadTileConfig(tileName: string): Promise<{ sprite: string; flags: object }> {
+        const tileFile = await Bun.file(path.resolve(__dirname, "tiles", `${tileName}.json`)).json();
+        return {
+            sprite: tileFile.sprite || "?",
+            flags: tileFile.flags || {}
+        };
+    }
+
     async load(): Promise<Room> {
         const file: RoomData = await Bun.file(path.resolve(__dirname, "rooms", `${this.room}.json`)).json();
 
         const width: number = file.width;
         const height: number = file.height
         const grid: Array<Array<Tile>> = file.grid;
-        let entities: Entity[] = [];
+        const entities: Entities = new Entities();
 
         for(let i = 0; i < file.grid.length; ++i){
             for(let j = 0; j < file.grid[i]!.length; ++j){
-                const entity: Tile|undefined = file.grid[i]![j];
+                const tileData: Tile|undefined = file.grid[i]![j];
 
-                if(!entity){
+                if(!tileData){
                     console.error("[LOADER][LOAD] Tile is undefined");
                     process.exit(-1);
                 }
 
-                switch(entity.tile){
-                    case "wall":
-                        const wallTile: Entity = new Entity(entity.tile, "#", entity.instanceId, entity.flags, entity.items);
-                        entities.push(wallTile);
-                        break;
-                    case "ground":
-                        const wallTile: Entity = new 
-                }
+                const tileConfig = await this.loadTileConfig(tileData.tile);
+                const entity: Entity = new Entity(
+                    tileData.tile,
+                    tileConfig.sprite,
+                    tileData.instanceId,
+                    { ...tileConfig.flags, ...tileData.flags },
+                    tileData.items || []
+                );
+                entities.add(entity);
             }
         }
 
-        const room: Room = new Room(height, width, grid);
+        const room: Room = new Room(height, width, grid, entities);
         return room;
     }
 }
