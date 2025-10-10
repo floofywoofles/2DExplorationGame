@@ -244,8 +244,8 @@
         "items": []
       },
       {
-        "tile": "chest",
-        "instanceId": "instance_175",
+        "tile": "ground",
+        "instanceId": "instance_189",
         "flags": {},
         "items": []
       },
@@ -292,9 +292,11 @@
         "items": []
       },
       {
-        "tile": "ground",
-        "instanceId": "instance_169",
-        "flags": {},
+        "tile": "door",
+        "instanceId": "instance_191",
+        "flags": {
+          "to": ""
+        },
         "items": []
       },
       {
@@ -334,9 +336,11 @@
         "items": []
       },
       {
-        "tile": "ground",
-        "instanceId": "instance_170",
-        "flags": {},
+        "tile": "door",
+        "instanceId": "instance_190",
+        "flags": {
+          "to": "instance_239"
+        },
         "items": []
       },
       {
@@ -377,7 +381,7 @@
       },
       {
         "tile": "ground",
-        "instanceId": "instance_54",
+        "instanceId": "instance_188",
         "flags": {},
         "items": []
       },

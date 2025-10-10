@@ -739,6 +739,24 @@ function openEditMenu(state: EditorState): void {
   }
 }
 
+/**
+ * Detect if a key combination is Ctrl+S (save)
+ * Works across Linux, macOS, and Windows
+ */
+function isCtrlS(key: string): boolean {
+  // On most systems, Ctrl+S is represented as '\x13' or '\u0013'
+  return key === '\x13' || key === '\u0013' || key === '\x1b[27;5;115~';
+}
+
+/**
+ * Detect if a key combination is Ctrl+C (exit)
+ * Works across Linux, macOS, and Windows
+ */
+function isCtrlC(key: string): boolean {
+  // On most systems, Ctrl+C is represented as '\x03' or '\u0003'
+  return key === '\x03' || key === '\u0003' || key === '\x1b[27;5;99~';
+}
+
 // Handle keypress in normal mode
 async function handleNormalModeKey(state: EditorState, key: string): Promise<void> {
   // PSEUDOCODE:
@@ -751,7 +769,19 @@ async function handleNormalModeKey(state: EditorState, key: string): Promise<voi
   //   'q' → cycleSelection(state, -1)
   //   '1'-'9' → selectItem(state, parseInt(key) - 1)
   //   ' ' → check if cell has item with flags/items, then openEditMenu or placeSelected
-  //   '\x03' (Ctrl+C) → saveAndExit(state)
+  //   Ctrl+C → saveAndExit(state)
+  
+  // Handle Ctrl+S (save)
+  if (isCtrlS(key)) {
+    await saveRoom(state);
+    return;
+  }
+  
+  // Handle Ctrl+C (exit)
+  if (isCtrlC(key)) {
+    cleanupAndExit(state);
+    return;
+  }
   
   switch (key) {
     case 'w':
@@ -795,12 +825,6 @@ async function handleNormalModeKey(state: EditorState, key: string): Promise<voi
         placeSelected(state);
       }
       break;
-    case '\x13': // Ctrl+S - Save without exit
-      await saveRoom(state);
-      break;
-    case '\x03': // Ctrl+C
-      cleanupAndExit(state);
-      break;
     case 'r':
       openRoomMenu(state);
       break;
@@ -814,7 +838,7 @@ async function handleNormalModeKey(state: EditorState, key: string): Promise<voi
       // Delete entity at current cursor position (replace with ground tile)
       const cellToDelete = state.grid[state.cursorY]?.[state.cursorX];
       if (cellToDelete && cellToDelete.tile.name !== 'ground') {
-        const groundTile = state.tiles[0];
+        const groundTile = state.tiles.find(tile => tile.name === 'ground');
         const row = state.grid[state.cursorY];
         if (groundTile && row) {
           row[state.cursorX] = {
@@ -1193,7 +1217,7 @@ async function handleRoomMenuKey(state: EditorState, key: string): Promise<void>
       } else if (state.inputField === 'new_room') {
         // Create new room
         state.roomName = state.inputBuffer;
-        const groundTile = state.tiles[0];
+        const groundTile = state.tiles.find(tile => tile.name === 'ground');
         if (groundTile) {
           state.grid = initializeGrid(groundTile, state);
         }
@@ -1588,7 +1612,7 @@ async function loadRoom(state: EditorState, filename: string): Promise<void> {
     
     // Rebuild grid
     const newGrid: GridCell[][] = [];
-    const defaultTile = state.tiles[0] || state.allPlaceables[0];
+    const defaultTile = state.tiles.find(tile => tile.name === 'ground') || state.allPlaceables[0];
     if (!defaultTile) return;
     
     // Create a fast lookup map for tiles by name
@@ -1721,9 +1745,10 @@ export async function startEditor(): Promise<void> {
     return;
   }
   
-  const groundTile = tiles[0];
+  // Find the ground tile specifically (don't assume it's first)
+  const groundTile = tiles.find(tile => tile.name === 'ground');
   if (!groundTile) {
-    console.error("Failed to load ground tile!");
+    console.error("No ground tile found! Please add a ground tile to src/tiles/");
     return;
   }
   

@@ -295,7 +295,7 @@
         "tile": "door",
         "instanceId": "instance_239",
         "flags": {
-          "to": "instance_138"
+          "to": "test_level"
         },
         "items": []
       },
