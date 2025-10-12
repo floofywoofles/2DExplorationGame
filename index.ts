@@ -186,10 +186,20 @@ async function goToDoorLocation(x: number, y: number, direction: string): Promis
         if (destinationDoor) {
             // Place player one block in the same direction from the destination door
             const newPosition = getPositionAheadOfDoor(destinationDoor.x, destinationDoor.y, direction);
-            player = new Player(newPosition.x, newPosition.y);
-        } else {
-            // Fallback to center if door not found
-            player = new Player(Math.floor(destinationRoom.getWidth() / 2), Math.floor(destinationRoom.getHeight() / 2));
+            switch(direction){
+                case "w":
+                    player = new Player(destinationDoor.y - 1, destinationDoor.x);
+                    break;
+                case "s":
+                    player = new Player(destinationDoor.y + 1, destinationDoor.x);
+                    break;
+                case "a":
+                    player = new Player(destinationDoor.y, destinationDoor.x - 1);
+                    break;
+                case "d":
+                    player = new Player(destinationDoor.y, destinationDoor.x + 1);
+                    break;
+            }
         }
 
         // Now update the game state to the destination room

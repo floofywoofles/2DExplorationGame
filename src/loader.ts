@@ -4,6 +4,7 @@ import type { Tile } from "./types/tileData";
 import type { RoomData } from "./types/roomData";
 import { Entity } from "./entity";
 import { Entities } from "./entities";
+import fs from "fs";
 
 export class RoomLoader {
     private room: string;
@@ -36,6 +37,21 @@ export class RoomLoader {
     }
 
     async load(): Promise<Room> {
+        if(this.room.startsWith("instance")){
+            // Search all the json files for this room
+            const dir = path.resolve(__dirname, "rooms");
+            const files = fs.readdirSync(dir);
+            for(const file of files){
+                if(file.endsWith(".json")){
+                    const roomData: RoomData = JSON.parse(fs.readFileSync(path.resolve(dir, file), "utf8")) as RoomData;
+                    if(roomData.grid.find(row => row.find(cell => cell.instanceId === this.room))){
+                        
+                        this.room = path.parse(file).name;
+                        return await this.load();
+                    }
+                }
+            }
+        }
         const file: RoomData = await Bun.file(path.resolve(__dirname, "rooms", `${this.room}.json`)).json();
 
         const width: number = file.width;
