@@ -25,6 +25,7 @@ interface TileData {
   id: string;                                        // Base ID (usually empty, instances get unique IDs)
   flags: Record<string, boolean | string | number>; // Default properties (e.g., is_solid, locked)
   items?: string[];                                  // Default items array for containers
+  dialogue?: string[];                               // Dialogue lines for this item
 }
 
 /**
@@ -94,6 +95,7 @@ interface EditorState {
     sprite: string;
     flags: Record<string, boolean | string | number>;
     items: string[];
+    dialogue: string[];
   };
   
   // === Item Editor ===
@@ -597,6 +599,24 @@ function renderItemEditor(state: EditorState): void {
   // Add item option
   const addItemCursor = itemIndex === state.editingItemMenuCursor ? '► ' : '  ';
   output += `  │ ${addItemCursor}+ Add item`.padEnd(63) + '│\n';
+  itemIndex++;
+  
+  // Dialogue
+  if (item.dialogue && item.dialogue.length > 0) {
+    output += '  │ DIALOGUE:'.padEnd(63) + '│\n';
+    for (let i = 0; i < item.dialogue.length; i++) {
+      const cursor = itemIndex === state.editingItemMenuCursor ? '► ' : '  ';
+      const dialogueLine = item.dialogue[i] || '';
+      const truncated = dialogueLine.length > 45 ? dialogueLine.substring(0, 45) + '...' : dialogueLine;
+      const line = `  │ ${cursor}[${i}] ${truncated}`;
+      output += line.padEnd(63) + '│\n';
+      itemIndex++;
+    }
+  }
+  
+  // Add dialogue option
+  const addDialogueCursor = itemIndex === state.editingItemMenuCursor ? '► ' : '  ';
+  output += `  │ ${addDialogueCursor}+ Add dialogue`.padEnd(63) + '│\n';
   
   output += '  ├' + '─'.repeat(60) + '┤\n';
   
@@ -882,6 +902,14 @@ function buildItemEditorMenuItems(state: EditorState): void {
     }
   }
   state.editingItemMenuItems.push('add_item');
+  
+  // Add dialogue
+  if (item.dialogue) {
+    for (let i = 0; i < item.dialogue.length; i++) {
+      state.editingItemMenuItems.push(`dialogue_${i}`);
+    }
+  }
+  state.editingItemMenuItems.push('add_dialogue');
 }
 
 // Save edited item to JSON
@@ -897,6 +925,7 @@ async function saveEditedItem(state: EditorState): Promise<void> {
     id: item.id,
     flags: item.flags,
     items: item.items,
+    dialogue: item.dialogue,
   };
   
   const filename = `${item.name}.json`;
@@ -1020,10 +1049,36 @@ async function handleItemEditorKey(state: EditorState, key: string): Promise<voi
         await saveEditedItem(state);
       } else if (menuItem === 'add_item') {
         // This is now handled by the item browser.
+      } else if (menuItem.startsWith('dialogue_') && item.dialogue) {
+        const dialogueIdx = parseInt(menuItem.split('_')[1] || '0');
+        item.dialogue[dialogueIdx] = state.inputBuffer;
+        await saveEditedItem(state);
+      } else if (menuItem === 'add_dialogue') {
+        if (!item.dialogue) item.dialogue = [];
+        item.dialogue.push(state.inputBuffer);
+        await saveEditedItem(state);
+        // Reload items to ensure fresh data
+        state.items = await loadItems();
+        state.allPlaceables = [...state.tiles, ...state.items];
+        // Rebuild menu to show new dialogue
+        buildItemEditorMenuItems(state);
+        // Move cursor to the newly added dialogue
+        const updatedItem = state.items[state.editingItemIndex];
+        if (updatedItem && updatedItem.dialogue) {
+          const newDialogueIndex = updatedItem.dialogue.length - 1;
+          // Calculate position: 2 (name, sprite) + flags + 1 (add_flag) + items + 1 (add_item) + dialogueIndex
+          const flagCount = Object.keys(updatedItem.flags).length;
+          const itemCount = updatedItem.items ? updatedItem.items.length : 0;
+          state.editingItemMenuCursor = 2 + flagCount + 1 + itemCount + 1 + newDialogueIndex;
+        }
+        // Exit input mode to show the updated menu
+        state.inputMode = false;
+        state.inputBuffer = '';
+        return; // Don't process further
       }
       
       // Save if not already saved above
-      if (menuItem !== 'add_flag' && !menuItem.startsWith('item_')) {
+      if (menuItem !== 'add_flag' && menuItem !== 'add_dialogue' && !menuItem.startsWith('item_') && !menuItem.startsWith('dialogue_')) {
         await saveEditedItem(state);
       }
       state.inputMode = false;
@@ -1076,6 +1131,11 @@ async function handleItemEditorKey(state: EditorState, key: string): Promise<voi
       } else if (menuItem.startsWith('item_') && item.items) {
         const itemIdx = parseInt(menuItem.split('_')[1] || '0');
         state.inputBuffer = item.items[itemIdx] || '';
+      } else if (menuItem.startsWith('dialogue_') && item.dialogue) {
+        const dialogueIdx = parseInt(menuItem.split('_')[1] || '0');
+        state.inputBuffer = item.dialogue[dialogueIdx] || '';
+      } else if (menuItem === 'add_dialogue') {
+        state.inputBuffer = '';
       }
     }
     
@@ -1105,6 +1165,17 @@ async function handleItemEditorKey(state: EditorState, key: string): Promise<voi
       buildItemEditorMenuItems(state);
       // Adjust cursor to stay in bounds
       state.editingItemMenuCursor = Math.min(state.editingItemMenuCursor, state.editingItemMenuItems.length - 1);
+    } else if (menuItem.startsWith('dialogue_') && item.dialogue) {
+      const dialogueIdx = parseInt(menuItem.split('_')[1] || '0');
+      item.dialogue.splice(dialogueIdx, 1);
+      await saveEditedItem(state);
+      // Reload items to ensure fresh data
+      state.items = await loadItems();
+      state.allPlaceables = [...state.tiles, ...state.items];
+      // Rebuild menu after deletion
+      buildItemEditorMenuItems(state);
+      // Adjust cursor to stay in bounds
+      state.editingItemMenuCursor = Math.min(state.editingItemMenuCursor, state.editingItemMenuItems.length - 1);
     }
   }
 }
@@ -1122,6 +1193,7 @@ function openItemCreator(state: EditorState): void {
     sprite: '',
     flags: {},
     items: [],
+    dialogue: [],
   };
 }
 
@@ -1135,6 +1207,7 @@ async function createItemFile(state: EditorState): Promise<void> {
     id: generateItemId(), // Generate unique ID for new item
     flags: state.newItemData.flags,
     items: state.newItemData.items,
+    dialogue: state.newItemData.dialogue,
   };
   
   const filename = `${state.newItemData.name}.json`;
@@ -1415,6 +1488,7 @@ async function createItemFileIfNotExists(itemName: string): Promise<void> {
       id: generateItemId(), // Generate unique ID for new item
       flags: {},
       items: [],
+      dialogue: [],
     };
     
     try {
@@ -1783,6 +1857,7 @@ export async function startEditor(): Promise<void> {
       sprite: '',
       flags: {},
       items: [],
+      dialogue: [],
     },
     itemEditorMode: false,
     itemEditorListMode: false,

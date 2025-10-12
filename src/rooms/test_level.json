@@ -244,10 +244,15 @@
         "items": []
       },
       {
-        "tile": "ground",
-        "instanceId": "instance_189",
-        "flags": {},
-        "items": []
+        "tile": "chest",
+        "instanceId": "instance_192",
+        "flags": {
+          "is_solid": true,
+          "has_ballsack": true
+        },
+        "items": [
+          "sack"
+        ]
       },
       {
         "tile": "ground",

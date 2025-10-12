@@ -6,5 +6,9 @@
     "is_solid": true,
     "has_ballsack": true
   },
-  "items": []
+  "items": [],
+  "dialogue": [
+    "This is a mysterious chest.",
+    "It seems to be locked.\nMaybe you need a key?"
+  ]
 }

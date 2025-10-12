@@ -5,5 +5,9 @@
   "flags": {
     "can_unlock_chest": true
   },
-  "items": []
+  "items": [],
+  "dialogue": [
+    "You caught a booger",
+    "You feel gross"
+  ]
 }
