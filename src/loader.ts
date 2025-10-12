@@ -22,7 +22,6 @@ export class RoomLoader {
         try {
             tileFile = await Bun.file(path.resolve(__dirname, "tiles", `${tileName}.json`)).json();
         } catch (error) {
-            // If not found in tiles, try items directory
             try {
                 tileFile = await Bun.file(path.resolve(__dirname, "items", `${tileName}.json`)).json();
             } catch (itemError) {
@@ -45,9 +44,13 @@ export class RoomLoader {
                 if(file.endsWith(".json")){
                     const roomData: RoomData = JSON.parse(fs.readFileSync(path.resolve(dir, file), "utf8")) as RoomData;
                     if(roomData.grid.find(row => row.find(cell => cell.instanceId === this.room))){
-                        
+                        console.log(`[LOADER] Found room: ${file}`);
+                        console.log(`[LOADER] Loading room: ${file}`);
+                        console.log(`[LOADER] Room data: ${JSON.stringify(roomData)}`);
+                        console.log(`[LOADER] Room name: ${path.parse(file).name}`);
                         this.room = path.parse(file).name;
-                        return await this.load();
+                        return await this.load(); 
+
                     }
                 }
             }

@@ -16,6 +16,41 @@
  */
 
 /**
+ * Global project root path - set during initialization.
+ * This allows the editor to work from any directory.
+ */
+let projectRoot: string = process.cwd();
+
+/**
+ * Find the project root by looking for the src/tiles directory.
+ * Searches upward from current directory until found or reaches filesystem root.
+ * 
+ * @returns The project root path, or current directory if not found
+ */
+async function findProjectRoot(): Promise<string> {
+  const fs = await import('fs/promises');
+  const path = await import('path');
+  
+  let currentDir = process.cwd();
+  const root = path.parse(currentDir).root;
+  
+  while (currentDir !== root) {
+    try {
+      const tilesPath = path.join(currentDir, 'src', 'tiles');
+      await fs.access(tilesPath);
+      // Found it!
+      return currentDir;
+    } catch {
+      // Not found, go up one directory
+      currentDir = path.dirname(currentDir);
+    }
+  }
+  
+  // Not found, return current directory
+  return process.cwd();
+}
+
+/**
  * TileData represents a tile or item definition loaded from JSON files.
  * These are the base templates that get placed in the grid as instances.
  */
@@ -119,13 +154,14 @@ interface EditorState {
  */
 async function loadTiles(): Promise<TileData[]> {
   const tiles: TileData[] = [];
-  const tilesDir = './src/tiles';
+  const path = await import('path');
+  const tilesDir = path.join(projectRoot, 'src', 'tiles');
   
   const fs = await import('fs/promises');
   const files = await fs.readdir(tilesDir);
   for (const file of files) {
     if (file.endsWith('.json')) {
-      const filePath = `${tilesDir}/${file}`;
+      const filePath = path.join(tilesDir, file);
       const content = await Bun.file(filePath).text();
       const tileData = JSON.parse(content) as TileData;
       tiles.push(tileData);
@@ -144,14 +180,15 @@ async function loadTiles(): Promise<TileData[]> {
  */
 async function loadItems(): Promise<TileData[]> {
   const items: TileData[] = [];
-  const itemsDir = './src/items';
+  const path = await import('path');
+  const itemsDir = path.join(projectRoot, 'src', 'items');
   
   try {
     const fs = await import('fs/promises');
     const files = await fs.readdir(itemsDir);
     for (const file of files) {
       if (file.endsWith('.json')) {
-        const filePath = `${itemsDir}/${file}`;
+        const filePath = path.join(itemsDir, file);
         const content = await Bun.file(filePath).text();
         const itemData = JSON.parse(content) as TileData;
         items.push(itemData);
@@ -298,6 +335,35 @@ function renderInfoBox(state: EditorState): void {
   
   if (selected.items && selected.items.length > 0) {
     output += `  │ Items: ${selected.items.join(', ')}`.padEnd(53) + '│\n';
+  }
+  
+  // Show information about the hovered cell
+  output += '  ├' + '─'.repeat(50) + '┤\n';
+  const hoveredCell = state.grid[state.cursorY]?.[state.cursorX];
+  if (hoveredCell) {
+    const hoveredTile = hoveredCell.tile;
+    output += `  │ Hovering: ${hoveredTile.name} [${hoveredTile.sprite}]`.padEnd(53) + '│\n';
+    
+    // Show instance-specific flags if they exist
+    if (hoveredCell.instanceFlags && Object.keys(hoveredCell.instanceFlags).length > 0) {
+      const flagsStr = Object.entries(hoveredCell.instanceFlags)
+        .map(([k, v]) => `${k}:${v}`)
+        .join(', ');
+      const truncatedFlags = flagsStr.length > 40 ? flagsStr.substring(0, 40) + '...' : flagsStr;
+      output += `  │ Flags: ${truncatedFlags}`.padEnd(53) + '│\n';
+    }
+    
+    // Show instance-specific items if they exist
+    if (hoveredCell.instanceItems && hoveredCell.instanceItems.length > 0) {
+      const itemsStr = hoveredCell.instanceItems.join(', ');
+      const truncatedItems = itemsStr.length > 40 ? itemsStr.substring(0, 40) + '...' : itemsStr;
+      output += `  │ Items: ${truncatedItems}`.padEnd(53) + '│\n';
+    }
+    
+    // Show dialogue if it exists
+    if (hoveredTile.dialogue && hoveredTile.dialogue.length > 0) {
+      output += `  │ Dialogue: ${hoveredTile.dialogue.length} line(s)`.padEnd(53) + '│\n';
+    }
   }
   
   output += '  ├' + '─'.repeat(50) + '┤\n';
@@ -928,8 +994,9 @@ async function saveEditedItem(state: EditorState): Promise<void> {
     dialogue: item.dialogue,
   };
   
+  const path = await import('path');
   const filename = `${item.name}.json`;
-  const filepath = `./src/items/${filename}`;
+  const filepath = path.join(projectRoot, 'src', 'items', filename);
   
   try {
     await Bun.write(filepath, JSON.stringify(itemData, null, 2));
@@ -982,8 +1049,9 @@ async function handleItemEditorKey(state: EditorState, key: string): Promise<voi
         item.name = state.inputBuffer;
         // Delete old file and create new one
         try {
-          const oldPath = `./src/items/${oldName}.json`;
-          const newPath = `./src/items/${item.name}.json`;
+          const path = await import('path');
+          const oldPath = path.join(projectRoot, 'src', 'items', `${oldName}.json`);
+          const newPath = path.join(projectRoot, 'src', 'items', `${item.name}.json`);
           await Bun.write(newPath, JSON.stringify(item, null, 2));
           // Try to delete old file
           await import('fs/promises').then(fs => fs.unlink(oldPath));
@@ -1210,8 +1278,9 @@ async function createItemFile(state: EditorState): Promise<void> {
     dialogue: state.newItemData.dialogue,
   };
   
+  const path = await import('path');
   const filename = `${state.newItemData.name}.json`;
-  const filepath = `./src/items/${filename}`;
+  const filepath = path.join(projectRoot, 'src', 'items', filename);
   
   try {
     await Bun.write(filepath, JSON.stringify(itemData, null, 2));
@@ -1421,7 +1490,8 @@ async function buildEntityListFromAllRooms(state: EditorState, entityName: strin
   
   for (const roomFile of roomFiles) {
     try {
-      const filepath = `./src/rooms/${roomFile}`;
+      const path = await import('path');
+      const filepath = path.join(projectRoot, 'src', 'rooms', roomFile);
       const content = await Bun.file(filepath).text();
       const roomData = JSON.parse(content) as {
         width: number;
@@ -1474,7 +1544,8 @@ async function buildEntityListFromAllRooms(state: EditorState, entityName: strin
  * @param itemName - Name of the item (becomes filename)
  */
 async function createItemFileIfNotExists(itemName: string): Promise<void> {
-  const filepath = `./src/items/${itemName}.json`;
+  const path = await import('path');
+  const filepath = path.join(projectRoot, 'src', 'items', `${itemName}.json`);
   
   try {
     // Try to read the file
@@ -1646,7 +1717,9 @@ async function handleEditModeKey(state: EditorState, key: string): Promise<void>
 async function loadAvailableRooms(): Promise<string[]> {
   try {
     const fs = await import('fs/promises');
-    const files = await fs.readdir('./src/rooms');
+    const path = await import('path');
+    const roomsDir = path.join(projectRoot, 'src', 'rooms');
+    const files = await fs.readdir(roomsDir);
     return files.filter(f => f.endsWith('.json'));
   } catch (error) {
     return [];
@@ -1671,7 +1744,8 @@ async function loadAvailableRooms(): Promise<string[]> {
 async function loadRoom(state: EditorState, filename: string): Promise<void> {
   
   try {
-    const filepath = `./src/rooms/${filename}`;
+    const path = await import('path');
+    const filepath = path.join(projectRoot, 'src', 'rooms', filename);
     const content = await Bun.file(filepath).text();
     const roomData = JSON.parse(content) as {
       width: number;
@@ -1775,8 +1849,9 @@ async function saveRoom(state: EditorState): Promise<void> {
     ),
   };
   
+  const path = await import('path');
   const filename = `${state.roomName}.json`;
-  const filepath = `./src/rooms/${filename}`;
+  const filepath = path.join(projectRoot, 'src', 'rooms', filename);
   
   try {
     await Bun.write(filepath, JSON.stringify(roomData, null, 2));
@@ -1810,6 +1885,10 @@ async function saveRoom(state: EditorState): Promise<void> {
 export async function startEditor(): Promise<void> {
   
   console.log("Loading editor...");
+  
+  // Find project root (searches upward for src/tiles directory)
+  projectRoot = await findProjectRoot();
+  console.log(`Project root: ${projectRoot}`);
   
   const tiles = await loadTiles();
   const items = await loadItems();
