@@ -3,7 +3,8 @@
   "sprite": "C",
   "id": "item_1760042911683_8xlr",
   "flags": {
-    "is_solid": true
+    "is_solid": true,
+    "has_ballsack": true
   },
   "items": []
 }

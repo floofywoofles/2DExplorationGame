@@ -100,9 +100,11 @@
         "items": []
       },
       {
-        "tile": "ground",
-        "instanceId": "instance_12",
-        "flags": {},
+        "tile": "wall",
+        "instanceId": "instance_200",
+        "flags": {
+          "is_solid": true
+        },
         "items": []
       },
       {
@@ -166,9 +168,11 @@
         "items": []
       },
       {
-        "tile": "ground",
-        "instanceId": "instance_22",
-        "flags": {},
+        "tile": "wall",
+        "instanceId": "instance_199",
+        "flags": {
+          "is_solid": true
+        },
         "items": []
       },
       {
@@ -232,9 +236,11 @@
         "items": []
       },
       {
-        "tile": "ground",
-        "instanceId": "instance_32",
-        "flags": {},
+        "tile": "wall",
+        "instanceId": "instance_198",
+        "flags": {
+          "is_solid": true
+        },
         "items": []
       },
       {
@@ -247,7 +253,10 @@
         "tile": "chest",
         "instanceId": "instance_175",
         "flags": {},
-        "items": []
+        "items": [
+          "coin",
+          "sack"
+        ]
       },
       {
         "tile": "ground",
@@ -298,45 +307,57 @@
         "items": []
       },
       {
-        "tile": "ground",
-        "instanceId": "instance_42",
-        "flags": {},
+        "tile": "wall",
+        "instanceId": "instance_197",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      },
+      {
+        "tile": "wall",
+        "instanceId": "instance_196",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      },
+      {
+        "tile": "wall",
+        "instanceId": "instance_190",
+        "flags": {
+          "is_solid": true
+        },
+        "items": []
+      },
+      {
+        "tile": "wall",
+        "instanceId": "instance_191",
+        "flags": {
+          "is_solid": true
+        },
         "items": []
       },
       {
         "tile": "ground",
-        "instanceId": "instance_43",
+        "instanceId": "instance_220",
         "flags": {},
         "items": []
       },
       {
-        "tile": "ground",
-        "instanceId": "instance_146",
-        "flags": {},
+        "tile": "wall",
+        "instanceId": "instance_193",
+        "flags": {
+          "is_solid": true
+        },
         "items": []
       },
       {
-        "tile": "ground",
-        "instanceId": "instance_45",
-        "flags": {},
-        "items": []
-      },
-      {
-        "tile": "ground",
-        "instanceId": "instance_46",
-        "flags": {},
-        "items": []
-      },
-      {
-        "tile": "ground",
-        "instanceId": "instance_47",
-        "flags": {},
-        "items": []
-      },
-      {
-        "tile": "ground",
-        "instanceId": "instance_170",
-        "flags": {},
+        "tile": "wall",
+        "instanceId": "instance_194",
+        "flags": {
+          "is_solid": true
+        },
         "items": []
       },
       {
@@ -359,19 +380,19 @@
       },
       {
         "tile": "ground",
-        "instanceId": "instance_51",
+        "instanceId": "instance_187",
         "flags": {},
         "items": []
       },
       {
         "tile": "ground",
-        "instanceId": "instance_52",
+        "instanceId": "instance_186",
         "flags": {},
         "items": []
       },
       {
         "tile": "ground",
-        "instanceId": "instance_53",
+        "instanceId": "instance_185",
         "flags": {},
         "items": []
       },
@@ -389,20 +410,22 @@
       },
       {
         "tile": "ground",
-        "instanceId": "instance_56",
+        "instanceId": "instance_182",
         "flags": {},
         "items": []
       },
       {
         "tile": "ground",
-        "instanceId": "instance_57",
+        "instanceId": "instance_183",
         "flags": {},
         "items": []
       },
       {
-        "tile": "ground",
-        "instanceId": "instance_58",
-        "flags": {},
+        "tile": "door",
+        "instanceId": "instance_188",
+        "flags": {
+          "to": "instance_239"
+        },
         "items": []
       },
       {
@@ -646,11 +669,9 @@
         "items": []
       },
       {
-        "tile": "wall",
-        "instanceId": "instance_113",
-        "flags": {
-          "is_solid": true
-        },
+        "tile": "ground",
+        "instanceId": "instance_189",
+        "flags": {},
         "items": []
       },
       {

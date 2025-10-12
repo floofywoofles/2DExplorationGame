@@ -1,0 +1,20 @@
+# 2dexplorationgame
+
+To install dependencies:
+
+```bash
+bun install
+```
+
+To run:
+
+```bash
+bun run index.ts
+```
+
+This project was created using `bun init` in bun v1.2.21. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+
+# Recommendations
+1: Add spacing to levels
+2: Add box above room to show currently selected entity
+3: Add ansi character to remove cursor
