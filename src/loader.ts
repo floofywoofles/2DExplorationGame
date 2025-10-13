@@ -8,7 +8,7 @@ import fs from "fs";
 
 export class RoomLoader {
     private room: string;
-    constructor(room: string){
+    constructor(room: string) {
         this.room = room;
     }
 
@@ -16,7 +16,7 @@ export class RoomLoader {
         return this.room;
     }
 
-    private async loadTileConfig(tileName: string): Promise<{ sprite: string; flags: object }> {
+    private async loadTileConfig(tileName: string): Promise<{ sprite: string; flags: object; dialogue: string[] }> {
         // Try to load from tiles directory first, then items directory
         let tileFile;
         try {
@@ -31,25 +31,26 @@ export class RoomLoader {
         }
         return {
             sprite: tileFile.sprite || "?",
-            flags: tileFile.flags || {}
+            flags: tileFile.flags || {},
+            dialogue: tileFile.dialogue || []
         };
     }
 
     async load(): Promise<Room> {
-        if(this.room.startsWith("instance")){
+        if (this.room.startsWith("instance")) {
             // Search all the json files for this room
             const dir = path.resolve(__dirname, "rooms");
             const files = fs.readdirSync(dir);
-            for(const file of files){
-                if(file.endsWith(".json")){
+            for (const file of files) {
+                if (file.endsWith(".json")) {
                     const roomData: RoomData = JSON.parse(fs.readFileSync(path.resolve(dir, file), "utf8")) as RoomData;
-                    if(roomData.grid.find(row => row.find(cell => cell.instanceId === this.room))){
+                    if (roomData.grid.find(row => row.find(cell => cell.instanceId === this.room))) {
                         console.log(`[LOADER] Found room: ${file}`);
                         console.log(`[LOADER] Loading room: ${file}`);
                         console.log(`[LOADER] Room data: ${JSON.stringify(roomData)}`);
                         console.log(`[LOADER] Room name: ${path.parse(file).name}`);
                         this.room = path.parse(file).name;
-                        return await this.load(); 
+                        return await this.load();
 
                     }
                 }
@@ -62,11 +63,11 @@ export class RoomLoader {
         const grid: Array<Array<Tile>> = file.grid;
         const entities: Entities = new Entities();
 
-        for(let i = 0; i < file.grid.length; ++i){
-            for(let j = 0; j < file.grid[i]!.length; ++j){
-                const tileData: Tile|undefined = file.grid[i]![j];
+        for (let i = 0; i < file.grid.length; ++i) {
+            for (let j = 0; j < file.grid[i]!.length; ++j) {
+                const tileData: Tile | undefined = file.grid[i]![j];
 
-                if(!tileData){
+                if (!tileData) {
                     console.error("[LOADER][LOAD] Tile is undefined");
                     process.exit(-1);
                 }
@@ -77,7 +78,8 @@ export class RoomLoader {
                     tileConfig.sprite,
                     tileData.instanceId,
                     { ...tileConfig.flags, ...tileData.flags },
-                    tileData.items || []
+                    tileData.items || [],
+                    tileConfig.dialogue || []
                 );
                 entities.add(entity);
             }

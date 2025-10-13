@@ -11,7 +11,8 @@
     "typescript": "^5"
   },
   "scripts": {
-    "editor": "bun run src/editor/editor.ts"
+    "editor": "bun run src/editor/editor.ts",
+    "start": "bun run index.ts"
   },
   "dependencies": {
     "minimist": "^1.2.8",

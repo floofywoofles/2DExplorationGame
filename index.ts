@@ -24,6 +24,11 @@ let out: string = "";
 let grid = room.getGrid();
 let entitiesCopy: Entities = entities;
 let player: Player = new Player(10 / 2, 10 / 2);
+let playerDirection: string = "d"; // Track which direction player is facing (w, a, s, d)
+let playerInventory: string[] = []; // Track items player has collected
+let currentDialogue: string[] = []; // Current dialogue being displayed
+let dialogueIndex: number = 0; // Current line of dialogue being shown
+let isInDialogue: boolean = false; // Whether we're currently in a dialogue
 
 /**
  * Checks if a position is valid for movement
@@ -115,6 +120,20 @@ function draw() {
     }
 
     console.log(out);
+
+    // Display dialogue if active
+    if (isInDialogue) {
+        console.log("\n" + "=".repeat(40));
+        // Display all dialogue lines
+        for (let i = 0; i < currentDialogue.length; i++) {
+            console.log(currentDialogue[i]);
+            if (i < currentDialogue.length - 1) {
+                console.log(""); // Add blank line between dialogue entries
+            }
+        }
+        console.log("=".repeat(40));
+        console.log(`[Press SPACE to close]`);
+    }
 }
 
 /**
@@ -165,6 +184,214 @@ function getPositionAheadOfDoor(doorX: number, doorY: number, direction: string)
     }
 }
 
+/**
+ * Attempts to pick up an item at the specified position
+ * @param x - Target x coordinate
+ * @param y - Target y coordinate
+ * @returns true if an item was picked up
+ */
+function pickupItem(x: number, y: number): boolean {
+    // Check bounds
+    if (y < 0 || y >= grid.length || x < 0 || x >= grid[0]!.length) {
+        return false;
+    }
+
+    // Get the tile at the target position
+    const tileData = grid[y]![x];
+    if (!tileData) {
+        return false;
+    }
+
+    // Get the entity for this tile
+    const entity = entities.getById(tileData.instanceId);
+    if (!entity) {
+        return false;
+    }
+
+    // Check if the entity is an item
+    const flags = entity.getFlags() as { is_solid?: boolean; to?: string };
+    const entityName = entity.getName();
+    const dialogue = entity.getDialogue();
+
+    // Don't pick up ground, walls, or doors
+    if (flags.to || entityName === "ground" || entityName === "wall" || entityName === "door") {
+        return false;
+    }
+
+    // Don't pick up items that have dialogue (they should be interacted with instead)
+    if (dialogue && dialogue.length > 0) {
+        return false;
+    }
+
+    // Check if this is a pickable item (coin, boogers, etc.)
+    if (entityName === "coin" || entityName === "boogers") {
+        console.log(`Picked up: ${entityName}`);
+        playerInventory.push(entityName);
+
+        // Replace the item with ground
+        const groundEntities = entities.getByName("ground");
+        if (groundEntities.length > 0) {
+            tileData.instanceId = groundEntities[0]!.getId();
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * Starts dialogue with an entity at the specified position
+ * @param x - Target x coordinate
+ * @param y - Target y coordinate
+ * @returns true if dialogue was started
+ */
+function startDialogue(x: number, y: number): boolean {
+    // Check bounds
+    if (y < 0 || y >= grid.length || x < 0 || x >= grid[0]!.length) {
+        return false;
+    }
+
+    // Get the tile at the target position
+    const tileData = grid[y]![x];
+    if (!tileData) {
+        return false;
+    }
+
+    // Get the entity for this tile
+    const entity = entities.getById(tileData.instanceId);
+    if (!entity) {
+        return false;
+    }
+
+    // Check if entity has dialogue
+    const dialogue = entity.getDialogue();
+    if (dialogue && dialogue.length > 0) {
+        currentDialogue = dialogue;
+        dialogueIndex = 0;
+        isInDialogue = true;
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * Advances to the next line of dialogue
+ * @returns true if there's more dialogue, false if dialogue ended
+ */
+function advanceDialogue(): boolean {
+    if (!isInDialogue || currentDialogue.length === 0) {
+        return false;
+    }
+
+    dialogueIndex++;
+
+    if (dialogueIndex >= currentDialogue.length) {
+        // End of dialogue
+        isInDialogue = false;
+        currentDialogue = [];
+        dialogueIndex = 0;
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * Gets the current dialogue line to display
+ * @returns the current dialogue line or empty string
+ */
+function getCurrentDialogueLine(): string {
+    if (!isInDialogue || currentDialogue.length === 0) {
+        return "";
+    }
+
+    return currentDialogue[dialogueIndex] || "";
+}
+
+/**
+ * Handles item pickup when space is pressed
+ * Tries current position first, then facing direction
+ */
+function handleItemPickup(): void {
+    // Try to pick up item at current position
+    let pickedUp = pickupItem(player.getX(), player.getY());
+
+    if (!pickedUp) {
+        // Try to pick up item in facing direction
+        let targetX = player.getX();
+        let targetY = player.getY();
+
+        switch (playerDirection) {
+            case 'w':
+                targetY--;
+                break;
+            case 's':
+                targetY++;
+                break;
+            case 'a':
+                targetX--;
+                break;
+            case 'd':
+                targetX++;
+                break;
+        }
+
+        pickedUp = pickupItem(targetX, targetY);
+    }
+
+    if (pickedUp) {
+        console.log(`Inventory: ${playerInventory.join(", ")}`);
+    } else {
+        console.log("Nothing to pick up here!");
+    }
+}
+
+/**
+ * Handles space key press - either closes dialogue or tries to interact/pickup
+ */
+function handleSpacePress(): void {
+    if (isInDialogue) {
+        // If in dialogue, close it
+        isInDialogue = false;
+        currentDialogue = [];
+        dialogueIndex = 0;
+        console.log("[Dialogue ended]");
+    } else {
+        // Try to start dialogue at current position first
+        let dialogueStarted = startDialogue(player.getX(), player.getY());
+
+        if (!dialogueStarted) {
+            // Try facing direction
+            let targetX = player.getX();
+            let targetY = player.getY();
+
+            switch (playerDirection) {
+                case 'w':
+                    targetY--;
+                    break;
+                case 's':
+                    targetY++;
+                    break;
+                case 'a':
+                    targetX--;
+                    break;
+                case 'd':
+                    targetX++;
+                    break;
+            }
+
+            dialogueStarted = startDialogue(targetX, targetY);
+        }
+
+        // If no dialogue, try to pick up item
+        if (!dialogueStarted) {
+            handleItemPickup();
+        }
+    }
+}
+
 async function goToDoorLocation(x: number, y: number, direction: string): Promise<void> {
     const tileData = grid[y]![x];
     const entity: Entity | undefined = entities.getById(tileData!.instanceId);
@@ -173,7 +400,7 @@ async function goToDoorLocation(x: number, y: number, direction: string): Promis
     if (doorFlags?.to && doorFlags.to.trim() !== "") {
         // Store the current room name before changing it
         const currentRoomName = gameState.currRoom;
-        
+
         // Load the destination room first
         const destinationLoader = new RoomLoader(doorFlags.to);
         const destinationRoom = await destinationLoader.load();
@@ -182,11 +409,11 @@ async function goToDoorLocation(x: number, y: number, direction: string): Promis
 
         // Find the corresponding door in the destination room that points back to current room
         const destinationDoor = findDestinationDoor(doorFlags.to, destinationGrid, destinationEntities, currentRoomName);
-        
+
         if (destinationDoor) {
             // Place player one block in the same direction from the destination door
             const newPosition = getPositionAheadOfDoor(destinationDoor.x, destinationDoor.y, direction);
-            switch(direction){
+            switch (direction) {
                 case "w":
                     player = new Player(destinationDoor.y - 1, destinationDoor.x);
                     break;
@@ -214,6 +441,7 @@ async function goToDoorLocation(x: number, y: number, direction: string): Promis
 
 console.clear();
 draw();
+
 process.stdin.on("data", async (key: string) => {
     let doorFound = false;
 
@@ -225,27 +453,48 @@ process.stdin.on("data", async (key: string) => {
             process.exit(0);
             break;
         case "w":
-            doorFound = await checkForDoor(player.getX(), player.getY() - 1, "w");
-            if (!doorFound) {
-                player.tryDecrementY(canMoveTo);
+            if (!isInDialogue) {
+                doorFound = await checkForDoor(player.getX(), player.getY() - 1, "w");
+                if (!doorFound) {
+                    player.tryDecrementY(canMoveTo);
+                }
+                playerDirection = "w";
             }
             break;
         case "d":
-            doorFound = await checkForDoor(player.getX() + 1, player.getY(), "d");
-            if (!doorFound) {
-                player.tryIncrementX(canMoveTo);
+            if (!isInDialogue) {
+                doorFound = await checkForDoor(player.getX() + 1, player.getY(), "d");
+                if (!doorFound) {
+                    player.tryIncrementX(canMoveTo);
+                }
+                playerDirection = "d";
             }
             break;
         case "s":
-            doorFound = await checkForDoor(player.getX(), player.getY() + 1, "s");
-            if (!doorFound) {
-                player.tryIncrementY(canMoveTo);
+            if (!isInDialogue) {
+                doorFound = await checkForDoor(player.getX(), player.getY() + 1, "s");
+                if (!doorFound) {
+                    player.tryIncrementY(canMoveTo);
+                }
+                playerDirection = "s";
             }
             break;
         case "a":
-            doorFound = await checkForDoor(player.getX() - 1, player.getY(), "a");
-            if (!doorFound) {
-                player.tryDecrementX(canMoveTo);
+            if (!isInDialogue) {
+                doorFound = await checkForDoor(player.getX() - 1, player.getY(), "a");
+                if (!doorFound) {
+                    player.tryDecrementX(canMoveTo);
+                }
+                playerDirection = "a";
+            }
+            break;
+        case " ":
+            handleSpacePress();
+            break;
+        default:
+            // Check if it's space with different encoding
+            if (key === " " || key.includes(" ")) {
+                handleSpacePress();
             }
             break;
     }
