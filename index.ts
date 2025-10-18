@@ -34,7 +34,7 @@ let isInDialogue: boolean = false; // Whether we're currently in a dialogue
  * Checks if a position is valid for movement
  * @param x - Target x coordinate
  * @param y - Target y coordinate
- * @returns true if the player can move to this position
+ * @returns boolean - true if the player can move to this position
  */
 const canMoveTo = (x: number, y: number): boolean => {
     // Check bounds
@@ -109,11 +109,11 @@ function draw() {
     for (let y = 0; y < grid.length; y++) {
         for (let x = 0; x < grid[y]!.length; x++) {
             if (player.getY() === y && player.getX() === x) {
-                out += "@";
+                out += " @ ";
             } else {
                 const tileData = grid[y]![x];
                 const entity: Entity | undefined = entities.getById(tileData!.instanceId);
-                out += entity?.getSprite() || "?";
+                out += ` ${entity?.getSprite() || "? "} `;
             }
         }
         out += "\n";
