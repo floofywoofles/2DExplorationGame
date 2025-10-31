@@ -15,6 +15,8 @@
  * - State-based rendering system
  */
 
+import { PersistenceManager } from "../persistence";
+
 /**
  * Global project root path - set during initialization.
  * This allows the editor to work from any directory.
@@ -144,6 +146,15 @@ interface EditorState {
   // === Item Browser ===
   itemBrowserMode: boolean;        // True when browsing items to add to an entity
   itemBrowserCursor: number;       // Cursor position in item browser
+
+  // === Persistence Manager ===
+  persistenceMode: boolean;        // True when viewing/managing persisted items
+  persistenceCursor: number;      // Cursor in persistence list
+  consumedEntities: Array<{       // List of consumed entities
+    instanceId: string;
+    roomName: string;
+    entityName: string;
+  }>;
 }
 
 /**
@@ -364,11 +375,23 @@ function renderInfoBox(state: EditorState): void {
     if (hoveredTile.dialogue && hoveredTile.dialogue.length > 0) {
       output += `  │ Dialogue: ${hoveredTile.dialogue.length} line(s)`.padEnd(53) + '│\n';
     }
+    
+    // Show persistence status
+    const persistenceManager = new PersistenceManager();
+    const isConsumed = persistenceManager.isConsumed(hoveredCell.instanceId);
+    const persistentFlag = hoveredCell.instanceFlags?.persistent;
+    const isPersistent = persistentFlag !== false; // Default true if not set
+    
+    if (isConsumed) {
+      output += `  │ Status: CONSUMED`.padEnd(53) + '│\n';
+    }
+    output += `  │ Persistent: ${isPersistent ? 'Yes' : 'No'}`.padEnd(53) + '│\n';
   }
   
   output += '  ├' + '─'.repeat(50) + '┤\n';
-  output += '  │ WASD=move  E/Q=cycle  1-9=items  R=room  I/L   │\n';
+  output += '  │ WASD=move  E/Q=cycle  1-9=items  R=room  I/L  P │\n';
   output += '  │ Space=place/edit  D=delete  Ctrl+S=save  Ctrl+C=exit │\n';
+  output += '  │ P=Persistence Manager                                   │\n';
   output += '  └' + '─'.repeat(50) + '┘\n';
   
   process.stdout.write(output);
@@ -388,9 +411,21 @@ function renderEditMenu(state: EditorState): void {
   const cell = state.grid[state.editingCell.y]?.[state.editingCell.x];
   if (!cell) return;
   
+  // Check persistence status (consumed state)
+  const persistenceManager = new PersistenceManager();
+  const isConsumed = persistenceManager.isConsumed(cell.instanceId);
+  
+  // Check persistent flag (whether entity should be tracked)
+  const persistentFlag = cell.instanceFlags?.persistent;
+  const isPersistent = persistentFlag !== false; // Default true if not set
+  
   let output = '\n\n  ┌' + '─'.repeat(50) + '┐\n';
   output += `  │ Editing: ${cell.tile.name} [${cell.tile.sprite}]`.padEnd(53) + '│\n';
   output += `  │ Instance ID: ${cell.instanceId}`.padEnd(53) + '│\n';
+  if (isConsumed) {
+    output += `  │ Status: CONSUMED`.padEnd(53) + '│\n';
+  }
+  output += `  │ Persistent: ${isPersistent ? 'Yes' : 'No'}`.padEnd(53) + '│\n';
   output += '  ├' + '─'.repeat(50) + '┤\n';
   
   let itemIndex = 0;
@@ -398,6 +433,8 @@ function renderEditMenu(state: EditorState): void {
   if (cell.instanceFlags && Object.keys(cell.instanceFlags).length > 0) {
     output += '  │ FLAGS:'.padEnd(53) + '│\n';
     for (const [key, value] of Object.entries(cell.instanceFlags)) {
+      // Skip persistent flag from regular flags list since we show it separately
+      if (key === 'persistent') continue;
       const cursor = itemIndex === state.editMenuCursor ? '► ' : '  ';
       const line = `  │ ${cursor}${key}: ${value}`;
       output += line.padEnd(53) + '│\n';
@@ -416,7 +453,14 @@ function renderEditMenu(state: EditorState): void {
     // Add new item option
     const cursor = itemIndex === state.editMenuCursor ? '► ' : '  ';
     output += `  │ ${cursor}+ Add item`.padEnd(53) + '│\n';
+    itemIndex++;
   }
+  
+  // Add persistence toggle option (for the persistent flag, not consumed status)
+  output += '  ├' + '─'.repeat(50) + '┤\n';
+  const persistenceCursor = itemIndex === state.editMenuCursor ? '► ' : '  ';
+  const persistenceText = isPersistent ? 'Disable persistence (respawn on reload)' : 'Enable persistence (track when picked up)';
+  output += `  │ ${persistenceCursor}${persistenceText}`.padEnd(53) + '│\n';
   
   output += '  ├' + '─'.repeat(50) + '┤\n';
   
@@ -424,7 +468,8 @@ function renderEditMenu(state: EditorState): void {
     output += `  │ Input: ${state.inputBuffer}_`.padEnd(53) + '│\n';
     output += '  │ Enter=confirm  Tab=browse  ESC=cancel         │\n';
   } else {
-    output += '  │ W/S=navigate  Enter=edit  D=delete  ESC=close │\n';
+    output += '  │ W/S=navigate  Enter=toggle/edit  D=delete    │\n';
+    output += '  │ ESC=close                                      │\n';
   }
   
   output += '  └' + '─'.repeat(50) + '┘\n';
@@ -698,10 +743,43 @@ function renderItemEditor(state: EditorState): void {
   process.stdout.write(output);
 }
 
+// Render persistence manager menu
+function renderPersistenceMenu(state: EditorState): void {
+  let output = '\n\n  ┌' + '─'.repeat(60) + '┐\n';
+  output += '  │ Persistence Manager - Consumed Entities'.padEnd(63) + '│\n';
+  output += '  ├' + '─'.repeat(60) + '┤\n';
+  
+  if (state.consumedEntities.length === 0) {
+    output += '  │   (no consumed entities)'.padEnd(63) + '│\n';
+  } else {
+    for (let i = 0; i < state.consumedEntities.length; i++) {
+      const entity = state.consumedEntities[i];
+      if (!entity) continue;
+      const cursor = i === state.persistenceCursor ? '► ' : '  ';
+      const line = `  │ ${cursor}${entity.instanceId} [${entity.roomName}] - ${entity.entityName}`;
+      output += line.padEnd(63) + '│\n';
+    }
+  }
+  
+  output += '  ├' + '─'.repeat(60) + '┤\n';
+  output += '  │ Actions:'.padEnd(63) + '│\n';
+  const actionStart = state.consumedEntities.length;
+  const clearCursor = actionStart === state.persistenceCursor ? '► ' : '  ';
+  output += `  │ ${clearCursor}Clear all consumed entities`.padEnd(63) + '│\n';
+  
+  output += '  ├' + '─'.repeat(60) + '┤\n';
+  output += '  │ W/S=navigate  Enter=restore  C=clear all  ESC=close │\n';
+  output += '  └' + '─'.repeat(60) + '┘\n';
+  
+  process.stdout.write(output);
+}
+
 // Full render
 function render(state: EditorState): void {
   clearScreen();
-  if (state.itemBrowserMode) {
+  if (state.persistenceMode) {
+    renderPersistenceMenu(state);
+  } else if (state.itemBrowserMode) {
     renderItemBrowser(state);
   } else if (state.itemEditorMode) {
     if (state.itemEditorListMode) {
@@ -823,6 +901,8 @@ function openEditMenu(state: EditorState): void {
     }
     state.editMenuItems.push('add_item');
   }
+  // Add persistence toggle option
+  state.editMenuItems.push('toggle_persistence');
 }
 
 /**
@@ -919,6 +999,10 @@ async function handleNormalModeKey(state: EditorState, key: string): Promise<voi
       break;
     case 'l':
       openItemEditorList(state);
+      break;
+    case 'p':
+    case 'P':
+      openPersistenceMode(state);
       break;
     case 'D':
       // Delete entity at current cursor position (replace with ground tile)
@@ -1673,7 +1757,20 @@ async function handleEditModeKey(state: EditorState, key: string): Promise<void>
     const menuItem = state.editMenuItems[state.editMenuCursor];
     if (!menuItem) return;
     
-    if (menuItem === 'add_item') {
+    if (menuItem === 'toggle_persistence') {
+      // Toggle persistent flag
+      if (!cell.instanceFlags) {
+        cell.instanceFlags = {};
+      }
+      const currentValue = cell.instanceFlags.persistent;
+      // Toggle: if true or undefined (default), set to false; if false, set to true
+      if (currentValue === false) {
+        cell.instanceFlags.persistent = true;
+      } else {
+        cell.instanceFlags.persistent = false;
+      }
+      openEditMenu(state); // Refresh menu to show updated status
+    } else if (menuItem === 'add_item') {
       state.itemBrowserMode = true;
       state.itemBrowserCursor = 0;
     } else if (menuItem.startsWith('item_') && cell.instanceItems) {
@@ -1863,6 +1960,103 @@ async function saveRoom(state: EditorState): Promise<void> {
 }
 
 /**
+ * Load consumed entities from persistence manager and match them to rooms
+ */
+async function loadConsumedEntities(state: EditorState): Promise<void> {
+  const persistenceManager = new PersistenceManager();
+  const consumedIds = persistenceManager.getAllConsumed();
+  state.consumedEntities = [];
+  
+  // Load all rooms to find which room each consumed entity belongs to
+  const roomFiles = await loadAvailableRooms();
+  
+  for (const roomFile of roomFiles) {
+    try {
+      const path = await import('path');
+      const filepath = path.join(projectRoot, 'src', 'rooms', roomFile);
+      const content = await Bun.file(filepath).text();
+      const roomData = JSON.parse(content) as {
+        grid: Array<Array<{
+          tile: string;
+          instanceId?: string;
+        }>>;
+      };
+      
+      const roomName = roomFile.replace('.json', '');
+      
+      // Scan grid for consumed entities
+      for (let y = 0; y < roomData.grid.length; y++) {
+        const row = roomData.grid[y];
+        if (!row) continue;
+        
+        for (let x = 0; x < row.length; x++) {
+          const cell = row[x];
+          if (cell && cell.instanceId && consumedIds.includes(cell.instanceId)) {
+            state.consumedEntities.push({
+              instanceId: cell.instanceId,
+              roomName: roomName,
+              entityName: cell.tile,
+            });
+          }
+        }
+      }
+    } catch (error) {
+      // Skip rooms that can't be loaded
+      console.error(`Error loading room ${roomFile}:`, error);
+    }
+  }
+}
+
+/**
+ * Open persistence mode
+ */
+async function openPersistenceMode(state: EditorState): Promise<void> {
+  state.persistenceMode = true;
+  state.persistenceCursor = 0;
+  await loadConsumedEntities(state);
+}
+
+/**
+ * Handle keypress in persistence mode
+ */
+async function handlePersistenceKey(state: EditorState, key: string): Promise<void> {
+  const persistenceManager = new PersistenceManager();
+  const totalItems = state.consumedEntities.length + 1; // Entities + "Clear all" option
+  
+  if (key === '\x1b') { // ESC - close
+    state.persistenceMode = false;
+    state.persistenceCursor = 0;
+    
+  } else if (key === 'w') { // Up
+    state.persistenceCursor = Math.max(0, state.persistenceCursor - 1);
+    
+  } else if (key === 's') { // Down
+    state.persistenceCursor = Math.min(totalItems - 1, state.persistenceCursor + 1);
+    
+  } else if (key === '\r' || key === '\n' || key === ' ') { // Enter/Space - restore or clear
+    if (state.persistenceCursor < state.consumedEntities.length) {
+      // Restore selected entity
+      const entity = state.consumedEntities[state.persistenceCursor];
+      if (entity) {
+        persistenceManager.unmarkAsConsumed(entity.instanceId);
+        await loadConsumedEntities(state); // Reload list
+        state.persistenceCursor = Math.min(state.persistenceCursor, state.consumedEntities.length);
+      }
+    } else {
+      // Clear all
+      persistenceManager.clearAll();
+      await loadConsumedEntities(state); // Reload list
+      state.persistenceCursor = 0;
+    }
+    
+  } else if (key === 'c' || key === 'C') { // C - clear all
+    persistenceManager.clearAll();
+    await loadConsumedEntities(state); // Reload list
+    state.persistenceCursor = 0;
+  }
+}
+
+/**
  * Main entry point for the TUI editor.
  * 
  * Initialization:
@@ -1946,6 +2140,9 @@ export async function startEditor(): Promise<void> {
     editingItemMenuItems: [],
     itemBrowserMode: false,
     itemBrowserCursor: 0,
+    persistenceMode: false,
+    persistenceCursor: 0,
+    consumedEntities: [],
   };
   
   // Initialize grid after state is created
@@ -1963,7 +2160,9 @@ export async function startEditor(): Promise<void> {
   
   // Handle keypresses
   process.stdin.on('data', async (key: string) => {
-    if (state.itemBrowserMode) {
+    if (state.persistenceMode) {
+      await handlePersistenceKey(state, key);
+    } else if (state.itemBrowserMode) {
       await handleItemBrowserKey(state, key);
     } else if (state.itemEditorMode) {
       if (state.itemEditorListMode) {

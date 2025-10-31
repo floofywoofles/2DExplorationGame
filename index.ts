@@ -4,6 +4,7 @@ import type { Entity } from './src/entity';
 import { RoomLoader } from './src/loader';
 import { Player } from './src/player';
 import type { Room } from './src/room';
+import { PersistenceManager } from './src/persistence';
 
 // Run the TUI editor
 // startEditor()
@@ -16,7 +17,8 @@ const gameState: GameState = {
     currRoom: "test_level"
 };
 
-let loader: RoomLoader = new RoomLoader(gameState.currRoom);
+const persistenceManager = new PersistenceManager();
+let loader: RoomLoader = new RoomLoader(gameState.currRoom, persistenceManager);
 let room = await loader.load();
 let entities: Entities = room.getEntities();
 
@@ -29,6 +31,7 @@ let playerInventory: string[] = []; // Track items player has collected
 let currentDialogue: string[] = []; // Current dialogue being displayed
 let dialogueIndex: number = 0; // Current line of dialogue being shown
 let isInDialogue: boolean = false; // Whether we're currently in a dialogue
+let interactingEntityId: string | null = null; // Instance ID of entity being interacted with
 
 /**
  * Checks if a position is valid for movement
@@ -228,6 +231,13 @@ function pickupItem(x: number, y: number): boolean {
         console.log(`Picked up: ${entityName}`);
         playerInventory.push(entityName);
 
+        // Mark as consumed for persistence only if persistent flag is true (default true)
+        const entityFlags = entity.getFlags() as { persistent?: boolean };
+        const isPersistent = entityFlags.persistent !== false; // Default to true if not set
+        if (isPersistent) {
+            persistenceManager.markAsConsumed(tileData.instanceId);
+        }
+
         // Replace the item with ground
         const groundEntities = entities.getByName("ground");
         if (groundEntities.length > 0) {
@@ -270,6 +280,7 @@ function startDialogue(x: number, y: number): boolean {
         currentDialogue = dialogue;
         dialogueIndex = 0;
         isInDialogue = true;
+        interactingEntityId = tileData.instanceId; // Track which entity we're interacting with
         return true;
     }
 
@@ -355,6 +366,20 @@ function handleSpacePress(): void {
     if (isInDialogue) {
         // If in dialogue, close it
         isInDialogue = false;
+        
+        // Check if we were interacting with a chest - mark it as consumed only if persistent
+        if (interactingEntityId) {
+            const entity = entities.getById(interactingEntityId);
+            if (entity && entity.getName() === "chest") {
+                const entityFlags = entity.getFlags() as { persistent?: boolean };
+                const isPersistent = entityFlags.persistent !== false; // Default to true if not set
+                if (isPersistent) {
+                    persistenceManager.markAsConsumed(interactingEntityId);
+                }
+            }
+            interactingEntityId = null;
+        }
+        
         currentDialogue = [];
         dialogueIndex = 0;
         console.log("[Dialogue ended]");
@@ -402,7 +427,7 @@ async function goToDoorLocation(x: number, y: number, direction: string): Promis
         const currentRoomName = gameState.currRoom;
 
         // Load the destination room first
-        const destinationLoader = new RoomLoader(doorFlags.to);
+        const destinationLoader = new RoomLoader(doorFlags.to, persistenceManager);
         const destinationRoom = await destinationLoader.load();
         const destinationEntities = destinationRoom.getEntities();
         const destinationGrid = destinationRoom.getGrid();

@@ -386,8 +386,13 @@
       {
         "tile": "coin",
         "instanceId": "instance_283",
-        "flags": {},
-        "items": []
+        "flags": {
+          "persistent": false
+        },
+        "items": [
+          "boogers",
+          "coin"
+        ]
       },
       {
         "tile": "ground",

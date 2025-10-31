@@ -248,7 +248,8 @@
         "instanceId": "instance_192",
         "flags": {
           "is_solid": true,
-          "has_ballsack": true
+          "has_ballsack": true,
+          "persistent": false
         },
         "items": [
           "sack"

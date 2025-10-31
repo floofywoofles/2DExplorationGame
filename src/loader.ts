@@ -5,11 +5,14 @@ import type { RoomData } from "./types/roomData";
 import { Entity } from "./entity";
 import { Entities } from "./entities";
 import fs from "fs";
+import type { PersistenceManager } from "./persistence";
 
 export class RoomLoader {
     private room: string;
-    constructor(room: string) {
+    private persistenceManager: PersistenceManager | null;
+    constructor(room: string, persistenceManager?: PersistenceManager) {
         this.room = room;
+        this.persistenceManager = persistenceManager || null;
     }
 
     getRoom(): string {
@@ -70,6 +73,29 @@ export class RoomLoader {
                 if (!tileData) {
                     console.error("[LOADER][LOAD] Tile is undefined");
                     process.exit(-1);
+                }
+
+                // Skip consumed entities (for persistence)
+                if (this.persistenceManager && this.persistenceManager.isConsumed(tileData.instanceId)) {
+                    // Replace consumed entity with ground tile
+                    const groundTileConfig = await this.loadTileConfig("ground");
+                    const groundEntity: Entity = new Entity(
+                        "ground",
+                        groundTileConfig.sprite,
+                        tileData.instanceId,
+                        groundTileConfig.flags,
+                        [],
+                        []
+                    );
+                    entities.add(groundEntity);
+                    // Update grid to show ground instead
+                    grid[i]![j] = {
+                        ...tileData,
+                        tile: "ground",
+                        flags: {},
+                        items: []
+                    };
+                    continue;
                 }
 
                 const tileConfig = await this.loadTileConfig(tileData.tile);
